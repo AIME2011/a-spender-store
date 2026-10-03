@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>A-SPENDER STORE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="world-transition" id="worldTransition" aria-hidden="true"></div>
+<header class="hdr">
+ <div class="container hdr-in">
+  <button class="back-btn" id="backBtn" aria-label="Retour" onclick="goBack()" hidden>←</button>
+  <div class="logo"><svg width="22" height="22" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="#e2672a" stroke-width="1.6"/><path d="M2 12h20M12 2v20M4.5 4.5c3 3 3 12 0 15M19.5 4.5c-3 3-3 12 0 15" fill="none" stroke="#e2672a" stroke-width="1.1"/></svg>A-SPENDER <span>STORE</span></div>
+  <nav id="nav"></nav>
+  <div class="hdr-icons">
+   <button class="icon-btn" aria-label="Compte" onclick="showSection('compte')"><svg width="16" height="16" viewBox="0 0 24 24" style="position:absolute;top:10px;left:10px"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4 20c1.5-4.5 5-6 8-6s6.5 1.5 8 6" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></button>
+   <button class="icon-btn" aria-label="Panier" onclick="showSection('panier')"><svg width="17" height="17" viewBox="0 0 24 24" style="position:absolute;top:10px;left:9px"><path d="M4 6h2l2 11h10l2-8H7" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="10" cy="20" r="1.3" fill="currentColor"/><circle cx="17" cy="20" r="1.3" fill="currentColor"/></svg><span class="badge-count" id="cartCount">0</span></button>
+  </div>
+ </div>
+</header>
+
+<main class="container">
+
+<section id="accueil">
+ <div class="hero">
+  <div>
+   <p class="hero-kicker">A-SPENDER • CLUB DE BASKETBALL</p>
+   <h1>L'équipement du terrain à la rue de Lomé.</h1>
+   <p>Maillots floqués, shorts, casquettes, chaussures et sacs pour le club A-SPENDER et pour tous ceux qui vivent le basket au quotidien.</p>
+   <div class="hero-ctas">
+    <button class="btn" onclick="showShop('premium')">Boutique Premium</button>
+    <button class="btn btn-outline" onclick="showShop('standard')">Boutique Standard</button>
+    <button class="btn btn-outline" onclick="showSection('equipe')">L'équipe et les matchs</button>
+   </div>
+  </div>
+  <div class="ball-wrap"><div class="ball" role="img" aria-label="Ballon de basket dans un cercle blanc">
+   <svg class="basketball-art" viewBox="0 0 300 300" aria-hidden="true" focusable="false">
+    <defs>
+     <radialGradient id="basketballSurface" cx="32%" cy="25%" r="78%">
+      <stop offset="0" stop-color="#ffbd5a"/>
+      <stop offset=".56" stop-color="#f47a18"/>
+      <stop offset="1" stop-color="#a93408"/>
+     </radialGradient>
+     <radialGradient id="basketballShade" cx="35%" cy="25%" r="78%">
+      <stop offset=".48" stop-color="#000" stop-opacity="0"/>
+      <stop offset="1" stop-color="#000" stop-opacity=".46"/>
+     </radialGradient>
+     <clipPath id="basketballClip"><circle cx="150" cy="150" r="132"/></clipPath>
+    </defs>
+    <circle cx="150" cy="150" r="132" fill="url(#basketballSurface)"/>
+    <g clip-path="url(#basketballClip)" fill="none" stroke="#24150e" stroke-width="9">
+     <path d="M18 150h264"/>
+     <path d="M150 18c-46 43-69 86-69 132s23 89 69 132"/>
+     <path d="M150 18c46 43 69 86 69 132s-23 89-69 132"/>
+     <path d="M28 79c37 24 78 36 122 36s85-12 122-36"/>
+     <path d="M28 221c37-24 78-36 122-36s85 12 122 36"/>
+    </g>
+    <circle cx="150" cy="150" r="132" fill="url(#basketballShade)"/>
+    <circle cx="150" cy="150" r="131" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="2"/>
+   </svg>
+  </div></div>
+ </div>
+ <div class="features">
+  <div class="feature"><h3>Retrait à Lomé</h3><p>Commande en ligne, retrait en boutique ou livraison dans la ville.</p></div>
+  <div class="feature"><h3>Paiement à la livraison</h3><p>Réglez en espèces ou par Mobile Money à la réception du colis.</p></div>
+  <div class="feature"><h3>Floquage sur demande</h3><p>Nom et numéro personnalisés sur les maillots du club.</p></div>
+ </div>
+ <div class="customer-promise"><span>Notre engagement</span><p>Chez A-SPENDER, le client est roi.</p></div>
+</section>
+
+<section id="boutique" style="display:none">
+ <div class="sec-head"><h2 id="shopTitle">Boutique Premium</h2><p id="shopCount"></p></div>
+ <p class="shop-description" id="shopDescription"></p>
+ <div class="shop-switch" role="group" aria-label="Choisir une boutique">
+  <button type="button" class="shop-choice active" data-tier="premium" aria-pressed="true" onclick="setShopTier('premium')">Premium <span>Gamme supérieure</span></button>
+  <button type="button" class="shop-choice" data-tier="standard" aria-pressed="false" onclick="setShopTier('standard')">Standard <span>200 à 5 000 FCFA</span></button>
+ </div>
+ <div class="filters">
+  <input type="text" id="fSearch" placeholder="Rechercher un article">
+  <select id="fCat"><option value="">Toutes catégories</option></select>
+  <select id="fSize"><option value="">Toutes tailles</option></select>
+  <select id="fPrice"><option value="">Tous les prix</option><option value="0-8000">Moins de 8 000 FCFA</option><option value="8000-20000">8 000 - 20 000 FCFA</option><option value="20000-999999">Plus de 20 000 FCFA</option></select>
+ </div>
+ <div class="grid" id="productGrid"></div>
+ <div class="reviews-box">
+  <div class="sec-head"><h2 style="font-size:24px">Avis clients</h2></div>
+  <div id="reviewList"><p class="empty">Aucun avis publié pour le moment. Les avis vérifiés des clients apparaîtront ici.</p></div>
+  <form id="reviewForm" style="max-width:420px">
+   <label>Nom</label><input type="text" required id="rvName">
+   <label>Note</label><select id="rvScore"><option>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select>
+   <label>Commentaire</label><textarea rows="2" required id="rvText"></textarea>
+   <button class="btn" style="margin-top:14px" type="submit">Publier l'avis</button>
+  </form>
+ </div>
+</section>
+
+<section id="panier" style="display:none">
+ <div class="sec-head"><h2>Panier</h2></div>
+ <div id="cartList"></div>
+ <div class="summary"><span style="font-family:system-ui;font-size:14px;color:var(--ink-soft)">Total</span><span id="cartTotal">0 FCFA</span></div>
+ <button class="btn" id="toCheckout" onclick="showSection('paiement')">Passer la commande</button>
+</section>
+
+<section id="paiement" style="display:none">
+ <div class="sec-head"><h2>Paiement</h2></div>
+ <div class="two-col">
+  <form id="checkoutForm">
+   <label>Nom complet</label><input type="text" required id="ckName">
+   <label>Téléphone</label><input type="tel" required id="ckPhone" placeholder="90 00 00 00">
+   <label>Quartier / adresse de livraison à Lomé</label><input type="text" required id="ckAddr">
+   <label>Mode de paiement</label>
+   <div class="radio-row">
+    <label><input type="radio" name="pay" checked> Paiement à la livraison</label>
+    <label><input type="radio" name="pay"> Mobile Money (Flooz / T-Money)</label>
+   </div>
+   <button class="btn" style="margin-top:18px" type="submit">Confirmer la commande</button>
+   <p class="note">Le paiement Mobile Money et carte bancaire nécessite une intégration avec une passerelle de paiement avant mise en ligne réelle.</p>
+  </form>
+  <div class="conf" id="confBox">
+   <h3>Commande enregistrée</h3>
+   <p class="order-thanks">Merci, chef, de nous avoir choisis ! 🙏🏀</p>
+   <p id="confRef"></p>
+   <div class="status-track">
+    <div class="status-step on"><b>1</b>Reçue</div>
+    <div class="status-step"><b>2</b>Préparation</div>
+    <div class="status-step"><b>3</b>Livraison</div>
+    <div class="status-step"><b>4</b>Livrée</div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<section id="compte" style="display:none">
+ <div class="sec-head"><h2>Compte client</h2></div>
+ <div id="accLogged" style="display:none"><p>Connecté en tant que <b id="accEmail"></b>.</p><button class="btn btn-outline" style="margin-top:14px" onclick="logout()">Se déconnecter</button></div>
+ <div id="accForms">
+  <div class="tabs"><button class="tab on" onclick="accTab('in')">Connexion</button><button class="tab" onclick="accTab('up')">Créer un compte</button></div>
+  <form id="accForm" style="max-width:380px">
+   <label>Email</label><input type="email" required id="accEmailIn">
+   <label>Mot de passe</label><input type="text" required id="accPassIn">
+   <button class="btn" style="margin-top:16px" type="submit" id="accSubmit">Se connecter</button>
+  </form>
+  <p class="note">Démonstration côté navigateur. Un compte client réel nécessite une authentification côté serveur.</p>
+ </div>
+</section>
+
+<section id="equipe" style="display:none">
+ <div class="sec-head"><h2>Équipe</h2></div>
+ <p style="max-width:60ch;color:var(--ink-soft)">Présentation du club, de son histoire et de son effectif à compléter par A-SPENDER STORE.</p>
+ <div class="players" id="playerGrid" style="margin-top:22px"></div>
+ <div class="matches">
+  <div class="sec-head" style="margin-bottom:12px"><h2 style="font-size:22px">Matchs</h2></div>
+  <div id="matchList"></div>
+ </div>
+</section>
+
+<section id="galerie" style="display:none">
+ <div class="sec-head"><h2>Galerie</h2></div>
+ <div class="gal-grid" id="galGrid"></div>
+</section>
+
+<section id="contact" style="display:none">
+ <div class="sec-head"><h2>Contact</h2></div>
+ <div class="two-col">
+  <form id="contactForm">
+   <label>Nom</label><input type="text" required>
+   <label>Email</label><input type="email" required>
+   <label>Message</label><textarea rows="4" required></textarea>
+   <button class="btn" style="margin-top:16px" type="submit">Envoyer</button>
+  </form>
+  <div>
+   <p style="color:var(--ink-soft);font-size:14px">Lomé, Togo</p>
+   <a class="btn" id="waBtn" style="margin-top:14px;display:inline-block" target="_blank" rel="noopener">Écrire sur WhatsApp</a>
+   <p class="note">Numéro WhatsApp à renseigner avant mise en ligne.</p>
+  </div>
+ </div>
+</section>
+
+<section id="admin" style="display:none">
+ <div class="sec-head"><h2>Administration locale</h2><button type="button" class="btn btn-outline" onclick="adminLogout()">Se déconnecter</button></div>
+ <p class="admin-warning">Accès de confort uniquement : ce mot de passe n’est pas une sécurité réelle. Les changements restent enregistrés dans ce navigateur et ne sont pas publiés sur le site GitHub Pages.</p>
+ <form id="adminSettings" class="admin-settings">
+  <label for="adminHeroTitle">Titre de l’accueil</label><input class="admin-input" id="adminHeroTitle" type="text" required>
+  <label for="adminHeroText">Texte de présentation</label><textarea class="admin-input" id="adminHeroText" rows="3" required></textarea>
+  <button class="btn" type="submit">Enregistrer les textes</button>
+ </form>
+ <div class="sec-head admin-products-head"><h2>Produits et photos</h2></div>
+ <div id="adminProducts">
+  <section class="admin-shop-group" aria-labelledby="adminPremiumTitle">
+   <div class="admin-shop-heading"><h3 id="adminPremiumTitle">Boutique Premium</h3><span>Produits haut de gamme</span></div>
+   <div id="adminPremiumProducts" class="admin-products"></div>
+   <form class="admin-add-product" data-tier="premium">
+    <h4>Ajouter un article Premium</h4>
+    <label>Nom de l’article</label><input class="admin-input" name="name" type="text" required>
+    <label>Catégorie</label><input class="admin-input" name="category" type="text" placeholder="Ex. Maillots, Chaussures" required>
+    <label>Prix (FCFA)</label><input class="admin-input" name="price" type="number" min="0" step="1" required>
+    <label>Tailles (séparées par des virgules)</label><input class="admin-input" name="sizes" type="text" placeholder="Ex. S, M, L, XL ou Unique" required>
+    <label>Photo de l’article (facultatif)</label><input class="admin-input" name="photo" type="file" accept="image/*">
+    <button class="btn" type="submit">Ajouter à la boutique Premium</button>
+   </form>
+  </section>
+  <section class="admin-shop-group" aria-labelledby="adminStandardTitle">
+   <div class="admin-shop-heading"><h3 id="adminStandardTitle">Boutique Standard</h3><span>Articles de 200 à 5 000 FCFA</span></div>
+   <div id="adminStandardProducts" class="admin-products"></div>
+   <form class="admin-add-product" data-tier="standard">
+    <h4>Ajouter un article Standard</h4>
+    <label>Nom de l’article</label><input class="admin-input" name="name" type="text" required>
+    <label>Catégorie</label><input class="admin-input" name="category" type="text" placeholder="Ex. Accessoires" required>
+    <label>Prix (FCFA, de 200 à 5 000)</label><input class="admin-input" name="price" type="number" min="200" max="5000" step="1" required>
+    <label>Tailles (séparées par des virgules)</label><input class="admin-input" name="sizes" type="text" placeholder="Ex. S, M, L ou Unique" required>
+    <label>Photo de l’article (facultatif)</label><input class="admin-input" name="photo" type="file" accept="image/*">
+    <button class="btn" type="submit">Ajouter à la boutique Standard</button>
+   </form>
+  </section>
+ </div>
+ <div class="sec-head admin-products-head"><h2>Équipe et matchs</h2></div>
+ <form id="adminPlayerForm" class="admin-settings">
+  <h3>Ajouter un joueur</h3>
+  <label for="adminPlayerName">Nom du joueur</label><input class="admin-input" id="adminPlayerName" name="name" type="text" required>
+  <label for="adminPlayerNumber">Numéro</label><input class="admin-input" id="adminPlayerNumber" name="number" type="number" min="0" max="99" required>
+  <label for="adminPlayerPosition">Poste</label><input class="admin-input" id="adminPlayerPosition" name="position" type="text" required>
+  <button class="btn" type="submit">Ajouter le joueur</button>
+ </form>
+ <div id="adminPlayers" class="admin-records"></div>
+ <form id="adminMatchForm" class="admin-settings">
+  <h3>Ajouter un match</h3>
+  <label for="adminMatchDate">Date</label><input class="admin-input" id="adminMatchDate" name="date" type="date" required>
+  <label for="adminMatchOpponent">Adversaire</label><input class="admin-input" id="adminMatchOpponent" name="opponent" type="text" required>
+  <label for="adminMatchVenue">Lieu</label><input class="admin-input" id="adminMatchVenue" name="venue" type="text" required>
+  <button class="btn" type="submit">Ajouter le match</button>
+ </form>
+ <div id="adminMatches" class="admin-records"></div>
+ <div class="sec-head admin-products-head"><h2>Galerie photo</h2></div>
+ <div class="admin-settings">
+  <label for="adminGalleryFiles">Ajouter des photos depuis cet appareil</label>
+  <input class="admin-input" id="adminGalleryFiles" type="file" accept="image/*" multiple>
+  <p id="adminGalleryStatus" class="note" role="status">Les photos seront enregistrées localement sur cet appareil.</p>
+ </div>
+ <div id="adminGallery" class="admin-gallery"></div>
+ <div class="sec-head admin-products-head"><h2>Mot de passe</h2></div>
+ <form id="adminPasswordChangeForm" class="admin-settings">
+  <label for="adminCurrentPassword">Mot de passe actuel</label><input class="admin-input" id="adminCurrentPassword" name="currentPassword" type="password" autocomplete="current-password" required>
+  <label for="adminNewPassword">Nouveau mot de passe (8 caractères minimum)</label><input class="admin-input" id="adminNewPassword" name="newPassword" type="password" autocomplete="new-password" minlength="8" required>
+  <label for="adminConfirmPassword">Confirmer le nouveau mot de passe</label><input class="admin-input" id="adminConfirmPassword" name="confirmPassword" type="password" autocomplete="new-password" minlength="8" required>
+  <p id="adminPasswordChangeStatus" class="note" role="status"></p>
+  <button class="btn" type="submit">Modifier le mot de passe</button>
+ </form>
+</section>
+
+</main>
+
+<footer class="ftr">
+ <div class="container ftr-in">
+  <div>© <span id="yr"></span> A-SPENDER STORE, Lomé.</div>
+  <div class="ftr-links"><a onclick="openModal('privacy')">Politique de confidentialité</a><a onclick="openModal('terms')">CGU</a><a href="#" onclick="openAdmin();return false">Accès SPENDER</a></div>
+ </div>
+</footer>
+
+<div class="modal-wrap" id="modal" style="display:none">
+ <div class="modal"><button class="modal-close" onclick="closeModal()">Fermer</button><div id="modalBody"></div></div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
