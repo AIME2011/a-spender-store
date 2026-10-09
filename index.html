@@ -74,6 +74,7 @@
 <section id="boutique" style="display:none">
  <div class="sec-head"><h2 id="shopTitle">Boutique Premium</h2><p id="shopCount"></p></div>
  <p class="shop-description" id="shopDescription"></p>
+ <p id="backendStatus" class="admin-warning" role="status" hidden></p>
  <div class="shop-switch" role="group" aria-label="Choisir une boutique">
   <button type="button" class="shop-choice active" data-tier="premium" aria-pressed="true" onclick="setShopTier('premium')">Premium <span>Gamme supérieure</span></button>
   <button type="button" class="shop-choice" data-tier="standard" aria-pressed="false" onclick="setShopTier('standard')">Standard <span>200 à 5 000 FCFA</span></button>
@@ -180,8 +181,8 @@
 </section>
 
 <section id="admin" style="display:none">
- <div class="sec-head"><h2>Administration locale</h2><button type="button" class="btn btn-outline" onclick="adminLogout()">Se déconnecter</button></div>
- <p class="admin-warning">Accès de confort uniquement : ce mot de passe n’est pas une sécurité réelle. Les changements restent enregistrés dans ce navigateur et ne sont pas publiés sur le site GitHub Pages.</p>
+ <div class="sec-head"><h2>Administration</h2><button type="button" class="btn btn-outline" onclick="adminLogout()">Se déconnecter</button></div>
+ <p class="admin-warning">Les modifications enregistrées ici sont partagées avec tous les visiteurs. L’accès est réservé au compte administrateur.</p>
  <form id="adminSettings" class="admin-settings">
   <label for="adminHeroTitle">Titre de l’accueil</label><input class="admin-input" id="adminHeroTitle" type="text" required>
   <label for="adminHeroText">Texte de présentation</label><textarea class="admin-input" id="adminHeroText" rows="3" required></textarea>
@@ -240,14 +241,6 @@
   <p id="adminGalleryStatus" class="note" role="status">Les photos seront enregistrées localement sur cet appareil.</p>
  </div>
  <div id="adminGallery" class="admin-gallery"></div>
- <div class="sec-head admin-products-head"><h2>Mot de passe</h2></div>
- <form id="adminPasswordChangeForm" class="admin-settings">
-  <label for="adminCurrentPassword">Mot de passe actuel</label><input class="admin-input" id="adminCurrentPassword" name="currentPassword" type="password" autocomplete="current-password" required>
-  <label for="adminNewPassword">Nouveau mot de passe (8 caractères minimum)</label><input class="admin-input" id="adminNewPassword" name="newPassword" type="password" autocomplete="new-password" minlength="8" required>
-  <label for="adminConfirmPassword">Confirmer le nouveau mot de passe</label><input class="admin-input" id="adminConfirmPassword" name="confirmPassword" type="password" autocomplete="new-password" minlength="8" required>
-  <p id="adminPasswordChangeStatus" class="note" role="status"></p>
-  <button class="btn" type="submit">Modifier le mot de passe</button>
- </form>
 </section>
 
 </main>
@@ -263,6 +256,8 @@
  <div class="modal"><button class="modal-close" onclick="closeModal()">Fermer</button><div id="modalBody"></div></div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
 <script src="script.js"></script>
 </body>
 </html>

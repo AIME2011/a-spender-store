@@ -1,12 +1,15 @@
 const sections=['accueil','boutique','panier','paiement','compte','equipe','galerie','contact','admin'];
 const navLabels={accueil:'Accueil',boutique:'Boutique',equipe:'Équipe',galerie:'Galerie',contact:'Contact'};
+const backend=window.supabase.createClient(window.ASPENDER_CONFIG.url,window.ASPENDER_CONFIG.publishableKey);
+const adminEmail=window.ASPENDER_CONFIG.adminEmail.toLowerCase();
+let adminUser=null;
 let currentSection='accueil';
 const sectionHistory=[];
 let shopTransitionTimer;
 document.body.dataset.world='premium';
 function updateBackButton(){document.getElementById('backBtn').hidden=sectionHistory.length===0;}
 function showSection(id){
- if(id==='admin'&&sessionStorage.getItem('aspender_admin_authenticated')!=='yes'){openAdmin();return;}
+ if(id==='admin'&&!isAdmin()){window.openAdmin();return;}
  if(currentSection && currentSection!==id){sectionHistory.push(currentSection);}
  currentSection=id;
  sections.forEach(s=>document.getElementById(s).style.display=s===id?'block':'none');
@@ -72,60 +75,53 @@ const products=[
  {id:106,tier:"standard",name:"Serviette de sport",cat:"Accessoires",price:5000,sizes:["Unique"],tag:""},
  {id:107,tier:"standard",name:"Autocollant A-SPENDER",cat:"Accessoires",price:200,sizes:["Unique"],tag:""}
 ];
-function loadLocalCatalog(){
- const saved=localStorage.getItem('aspender_admin_catalog');
- if(!saved)return;
- JSON.parse(saved).forEach(update=>{
-  const product=products.find(item=>item.id===update.id);
-  if(product){
-   if(typeof update.name==='string')product.name=update.name;
-   if(Number.isFinite(update.price)&&update.price>=0)product.price=update.price;
-   if(typeof update.image==='string')product.image=update.image;
-   if(typeof update.cat==='string')product.cat=update.cat;
-   if(Array.isArray(update.sizes))product.sizes=update.sizes.filter(size=>typeof size==='string');
-   if(typeof update.tag==='string')product.tag=update.tag;
-  }else if(Number.isInteger(update.id)&&['premium','standard'].includes(update.tier)&&typeof update.name==='string'&&typeof update.cat==='string'&&Number.isFinite(update.price)&&Array.isArray(update.sizes)){
-   products.push({
-    id:update.id,tier:update.tier,name:update.name,cat:update.cat,price:update.price,
-    sizes:update.sizes.filter(size=>typeof size==='string'),tag:typeof update.tag==='string'?update.tag:'',
-    image:typeof update.image==='string'?update.image:''
-   });
-  }
- });
-}
-loadLocalCatalog();
 const defaultHeroTitle=document.querySelector('#accueil h1').textContent;
 const defaultHeroText=document.querySelector('#accueil .hero p').textContent;
-function applyLocalSiteSettings(){
- const saved=localStorage.getItem('aspender_admin_site');
- if(!saved)return;
- const settings=JSON.parse(saved);
- if(typeof settings.title==='string')document.querySelector('#accueil h1').textContent=settings.title;
- if(typeof settings.description==='string')document.querySelector('#accueil .hero p').textContent=settings.description;
-}
-applyLocalSiteSettings();
 function escapeHtml(value){
  return String(value).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 }
-function loadLocalRecords(key){
- const saved=localStorage.getItem(key);
- if(!saved)return [];
- try{
-  const records=JSON.parse(saved);
-  if(!Array.isArray(records))throw new Error('Les données enregistrées ne sont pas une liste.');
-  return records;
- }catch(error){
-  console.error(`Impossible de lire les données locales "${key}".`,error);
-  const status=document.getElementById('adminGalleryStatus');
-  if(status)status.textContent='Certaines données locales sont illisibles. Vérifie le stockage de cet appareil.';
-  return [];
- }
+let teamPlayers=[];
+let teamMatches=[];
+let galleryPhotos=[];
+let siteSettings={title:defaultHeroTitle,description:defaultHeroText};
+function isAdmin(){return Boolean(adminUser&&adminUser.email&&adminUser.email.toLowerCase()===adminEmail);}
+function showBackendStatus(message){
+ const status=document.getElementById('backendStatus');
+ if(!status)return;
+ status.textContent=message;
+ status.hidden=!message;
 }
-let teamPlayers=loadLocalRecords('aspender_admin_players');
-let teamMatches=loadLocalRecords('aspender_admin_matches');
-let galleryPhotos=loadLocalRecords('aspender_admin_gallery');
-function saveLocalRecords(key,records){
- localStorage.setItem(key,JSON.stringify(records));
+function reportBackendError(context,error){
+ console.error(`${context}:`,error);
+ showBackendStatus(`${context} : ${error.message||'erreur inconnue'}`);
+}
+async function loadSharedData(){
+ const queries=[
+  backend.from('products').select('*').order('id'),
+  backend.from('site_settings').select('*').eq('id',true).maybeSingle(),
+  backend.from('team_players').select('*'),
+  backend.from('team_matches').select('*').order('date'),
+  backend.from('gallery_photos').select('*')
+ ];
+ const results=await Promise.all(queries);
+ const failed=results.find(result=>result.error);
+ if(failed)throw failed.error;
+ products.splice(0,products.length,...results[0].data.map(row=>({
+  id:Number(row.id),tier:row.tier,name:row.name,cat:row.cat,price:Number(row.price),
+  sizes:Array.isArray(row.sizes)?row.sizes:[],tag:row.tag||'',image:row.image||''
+ })));
+ if(results[1].data){
+  siteSettings={title:results[1].data.title,description:results[1].data.description};
+  document.querySelector('#accueil h1').textContent=siteSettings.title;
+  document.querySelector('#accueil .hero p').textContent=siteSettings.description;
+ }
+ teamPlayers=results[2].data;
+ teamMatches=results[3].data;
+ galleryPhotos=results[4].data;
+ rebuildShopFilters();
+ renderProducts();
+ renderTeamAndGallery();
+ showBackendStatus('');
 }
 function renderTeamAndGallery(){
  document.getElementById('playerGrid').innerHTML=teamPlayers.length
@@ -150,7 +146,7 @@ function hashAdminPassword(password,existingHash=''){
   return existingHash.startsWith('sha256:')?`sha256:${digest}`:digest;
  });
 }
-function openAdmin(){
+function openLegacyLocalAdmin(){
  if(sessionStorage.getItem('aspender_admin_authenticated')==='yes'){
   renderAdminEditor();
   showSection('admin');
@@ -254,7 +250,7 @@ function compressImageFile(file){
   reader.readAsDataURL(file);
  });
 }
-document.getElementById('adminPasswordChangeForm').addEventListener('submit',async event=>{
+document.getElementById('adminPasswordChangeForm')?.addEventListener('submit',async event=>{
  event.preventDefault();
  const form=event.currentTarget;
  const status=document.getElementById('adminPasswordChangeStatus');
@@ -609,3 +605,238 @@ const legal={
 };
 function openModal(k){document.getElementById('modalBody').innerHTML=`<h3>${legal[k].t}</h3><p>${legal[k].b}</p>`;document.getElementById('modal').style.display='flex';}
 function closeModal(){document.getElementById('modal').style.display='none';}
+
+function openCloudAdmin(){
+ if(isAdmin()){
+  window.renderAdminEditor();
+  showSection('admin');
+  return;
+ }
+ document.getElementById('modalBody').innerHTML=`
+  <h3>Accès administrateur</h3>
+  <p>Un lien de connexion sécurisé sera envoyé à l’adresse administrateur configurée.</p>
+  <form id="adminLoginForm">
+   <p id="adminLoginError" class="admin-error" role="status"></p>
+   <button class="btn" type="submit">M’envoyer le lien de connexion</button>
+  </form>`;
+ document.getElementById('modal').style.display='flex';
+ document.getElementById('adminLoginForm').addEventListener('submit',async event=>{
+  event.preventDefault();
+  const status=document.getElementById('adminLoginError');
+  try{
+   const {error}=await backend.auth.signInWithOtp({
+    email:window.ASPENDER_CONFIG.adminEmail,
+    options:{emailRedirectTo:window.location.href}
+   });
+   if(error)throw error;
+   status.textContent=`Lien envoyé à ${window.ASPENDER_CONFIG.adminEmail}.`;
+  }catch(error){
+   status.textContent=`Impossible d’envoyer le lien : ${error.message}`;
+  }
+ });
+}
+window.openAdmin=openCloudAdmin;
+window.adminLogout=async function(){
+ const {error}=await backend.auth.signOut();
+ if(error){reportBackendError('Impossible de fermer la session',error);return;}
+ adminUser=null;
+ showSection('accueil');
+};
+window.renderAdminEditor=function(){
+ document.getElementById('adminHeroTitle').value=siteSettings.title||defaultHeroTitle;
+ document.getElementById('adminHeroText').value=siteSettings.description||defaultHeroText;
+ const productEditor=product=>`
+  <form class="admin-product" data-product-id="${product.id}">
+   <h3>${escapeHtml(product.name)}</h3>
+   <label>Nom de l’article</label><input class="admin-input" name="name" type="text" required value="${escapeHtml(product.name)}">
+   <label>Prix (FCFA)</label><input class="admin-input" name="price" type="number" min="${product.tier==='standard'?200:0}" max="${product.tier==='standard'?5000:99999999}" required value="${product.price}">
+   <label>Changer la photo</label><input class="admin-input" name="photo" type="file" accept="image/*">
+   <img class="admin-preview" src="${escapeHtml(product.image||'')}" alt="Aperçu de ${escapeHtml(product.name)}" ${product.image?'':'hidden'}>
+   <button class="btn" type="submit">Enregistrer l’article</button>
+  </form>`;
+ document.getElementById('adminPremiumProducts').innerHTML=products.filter(product=>product.tier==='premium').map(productEditor).join('');
+ document.getElementById('adminStandardProducts').innerHTML=products.filter(product=>product.tier==='standard').map(productEditor).join('');
+ renderAdminRecords();
+ renderTeamAndGallery();
+};
+
+async function uploadSharedImage(dataUrl){
+ const blob=await (await fetch(dataUrl)).blob();
+ const path=`${Date.now()}-${crypto.randomUUID()}.jpg`;
+ const {error}=await backend.storage.from('aspender-images').upload(path,blob,{contentType:'image/jpeg'});
+ if(error)throw error;
+ return backend.storage.from('aspender-images').getPublicUrl(path).data.publicUrl;
+}
+async function saveProductFromForm(form){
+ const product=products.find(item=>item.id===Number(form.dataset.productId));
+ const name=form.elements.name.value.trim();
+ const price=Number(form.elements.price.value);
+ if(!product||!name||!Number.isFinite(price)||price<Number(form.elements.price.min)||price>Number(form.elements.price.max)){
+  throw new Error('Vérifie le nom et le prix autorisé pour cet article.');
+ }
+ let image=product.image||'';
+ if(form.dataset.imageData)image=await uploadSharedImage(form.dataset.imageData);
+ const updated={...product,name,price,image};
+ const {error}=await backend.from('products').update({name,price,image}).eq('id',product.id);
+ if(error)throw error;
+ Object.assign(product,updated);
+ rebuildShopFilters();
+ renderProducts();
+ renderAdminEditor();
+}
+async function addProductFromForm(form){
+ const tier=form.dataset.tier;
+ const name=form.elements.name.value.trim();
+ const cat=form.elements.category.value.trim();
+ const price=Number(form.elements.price.value);
+ const sizes=form.elements.sizes.value.split(',').map(size=>size.trim()).filter(Boolean);
+ const standard=tier==='standard';
+ if(!name||!cat||!sizes.length||!Number.isFinite(price)||(standard&&(price<200||price>5000))||(!standard&&price<0)){
+  throw new Error(standard?'Vérifie les champs et choisis un prix entre 200 et 5 000 FCFA.':'Vérifie le nom, la catégorie, le prix et les tailles.');
+ }
+ const file=form.elements.photo.files[0];
+ if(file&&!file.type.startsWith('image/'))throw new Error('Choisis un fichier image valide.');
+ const id=Math.max(0,...products.filter(product=>product.tier===tier).map(product=>product.id))+1;
+ const image=file?await uploadSharedImage(await compressImageFile(file)):'';
+ const product={id,tier,name,cat,price,sizes,tag:'',image};
+ const {error}=await backend.from('products').insert(product);
+ if(error)throw error;
+ products.push(product);
+ form.reset();
+ rebuildShopFilters();
+ renderProducts();
+ renderAdminEditor();
+}
+async function saveSiteSettings(form){
+ const title=form.elements.adminHeroTitle.value.trim();
+ const description=form.elements.adminHeroText.value.trim();
+ const {error}=await backend.from('site_settings').upsert({id:true,title,description});
+ if(error)throw error;
+ siteSettings={title,description};
+ document.querySelector('#accueil h1').textContent=title;
+ document.querySelector('#accueil .hero p').textContent=description;
+ alert('Textes enregistrés et publiés pour tous les visiteurs.');
+}
+async function addTeamPlayer(form){
+ const player={id:crypto.randomUUID(),name:form.elements.name.value.trim(),number:Number(form.elements.number.value),position:form.elements.position.value.trim()};
+ const {error}=await backend.from('team_players').insert(player);
+ if(error)throw error;
+ teamPlayers.push(player);
+ renderAdminRecords();
+ renderTeamAndGallery();
+ form.reset();
+}
+async function addTeamMatch(form){
+ const match={id:crypto.randomUUID(),date:form.elements.date.value,opponent:form.elements.opponent.value.trim(),venue:form.elements.venue.value.trim()};
+ const {error}=await backend.from('team_matches').insert(match);
+ if(error)throw error;
+ teamMatches.push(match);
+ renderAdminRecords();
+ renderTeamAndGallery();
+ form.reset();
+}
+async function removeSharedRow(table,id,records){
+ const {error}=await backend.from(table).delete().eq('id',id);
+ if(error)throw error;
+ const index=records.findIndex(record=>String(record.id)===String(id));
+ if(index!==-1)records.splice(index,1);
+ renderAdminRecords();
+ renderTeamAndGallery();
+}
+async function addGalleryFiles(input){
+ const files=Array.from(input.files||[]);
+ const status=document.getElementById('adminGalleryStatus');
+ if(!files.length)return;
+ if(files.some(file=>!file.type.startsWith('image/')))throw new Error('Choisis uniquement des fichiers image.');
+ status.textContent='Préparation et enregistrement des photos…';
+ const added=[];
+ for(const file of files){
+  const image=await uploadSharedImage(await compressImageFile(file));
+  const photo={id:crypto.randomUUID(),name:file.name.replace(/\.[^.]+$/,'')||'Photo A-SPENDER',image};
+  const {error}=await backend.from('gallery_photos').insert(photo);
+  if(error)throw error;
+  added.push(photo);
+ }
+ galleryPhotos.push(...added);
+ renderAdminRecords();
+ renderTeamAndGallery();
+ status.textContent=`${added.length} photo(s) publiées pour tous les visiteurs.`;
+}
+window.addEventListener('submit',event=>{
+ const form=event.target;
+ const isAdminForm=form.matches('#adminSettings,#adminPlayerForm,#adminMatchForm,.admin-product,.admin-add-product');
+ if(!isAdminForm)return;
+ event.preventDefault();
+ event.stopImmediatePropagation();
+ (async()=>{
+  if(!isAdmin())throw new Error('Connecte-toi avec le compte administrateur.');
+  if(form.id==='adminSettings')await saveSiteSettings(form);
+  else if(form.id==='adminPlayerForm')await addTeamPlayer(form);
+  else if(form.id==='adminMatchForm')await addTeamMatch(form);
+  else if(form.matches('.admin-product'))await saveProductFromForm(form);
+  else await addProductFromForm(form);
+ })().catch(error=>alert(`Échec de l’enregistrement : ${error.message}`));
+},true);
+window.addEventListener('change',event=>{
+ const target=event.target;
+ if(target.matches('#adminProducts input[name="photo"]')){
+  event.stopImmediatePropagation();
+  const file=target.files[0];
+  if(!file)return;
+  if(!file.type.startsWith('image/')){alert('Choisis un fichier image valide.');target.value='';return;}
+  const form=target.closest('.admin-product');
+  compressImageFile(file).then(dataUrl=>{
+   form.dataset.imageData=dataUrl;
+   const preview=form.querySelector('.admin-preview');
+   preview.src=dataUrl;
+   preview.hidden=false;
+  }).catch(error=>alert(`Impossible de préparer l’image : ${error.message}`));
+ }else if(target.matches('#adminGalleryFiles')){
+  event.stopImmediatePropagation();
+  addGalleryFiles(target).catch(error=>{
+   document.getElementById('adminGalleryStatus').textContent=`Impossible de publier les photos : ${error.message}`;
+  }).finally(()=>{target.value='';});
+ }
+},true);
+window.addEventListener('click',event=>{
+ const button=event.target.closest('[data-remove-player],[data-remove-match],[data-remove-photo]');
+ if(!button)return;
+ event.preventDefault();
+ event.stopImmediatePropagation();
+ if(!isAdmin()){alert('Connecte-toi avec le compte administrateur.');return;}
+ if(button.hasAttribute('data-remove-player')){
+  removeSharedRow('team_players',button.dataset.removePlayer,teamPlayers).catch(error=>alert(`Impossible de supprimer le joueur : ${error.message}`));
+ }else if(button.hasAttribute('data-remove-match')){
+  removeSharedRow('team_matches',button.dataset.removeMatch,teamMatches).catch(error=>alert(`Impossible de supprimer le match : ${error.message}`));
+ }else{
+  removeSharedRow('gallery_photos',button.dataset.removePhoto,galleryPhotos).then(()=>{
+   document.getElementById('adminGalleryStatus').textContent='Photo supprimée.';
+  }).catch(error=>alert(`Impossible de supprimer la photo : ${error.message}`));
+ }
+},true);
+
+backend.auth.onAuthStateChange((event,session)=>{
+ adminUser=session?.user||null;
+ if(adminUser&&!isAdmin()){
+  adminUser=null;
+  backend.auth.signOut().catch(error=>reportBackendError('Impossible de fermer la session non autorisée',error));
+  const status=document.getElementById('adminLoginError');
+  if(status)status.textContent='Ce compte n’est pas autorisé à administrer la boutique.';
+  return;
+ }
+ if(event==='SIGNED_IN'&&isAdmin()){
+  closeModal();
+  window.renderAdminEditor();
+  showSection('admin');
+ }
+});
+backend.auth.getSession().then(({data,error})=>{
+ if(error)throw error;
+ adminUser=data.session?.user||null;
+ if(adminUser&&!isAdmin()){
+  adminUser=null;
+  return backend.auth.signOut();
+ }
+ return null;
+}).catch(error=>reportBackendError('Impossible de vérifier la session',error));
+loadSharedData().catch(error=>reportBackendError('Impossible de charger les données en ligne',error));
