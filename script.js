@@ -1,7 +1,12 @@
 const sections=['accueil','boutique','panier','paiement','compte','equipe','galerie','contact','admin'];
 const navLabels={accueil:'Accueil',boutique:'Boutique',equipe:'Équipe',galerie:'Galerie',contact:'Contact'};
-const backend=window.supabase.createClient(window.ASPENDER_CONFIG.url,window.ASPENDER_CONFIG.publishableKey);
-const adminEmail=window.ASPENDER_CONFIG.adminEmail.toLowerCase();
+const ASPENDER_CONFIG={
+ url:'https://cmuaoshkxpsfaqwjrlpu.supabase.co',
+ publishableKey:'sb_publishable_GhjBs1RS4zyvaQ3wnc6rKQ_uvxA1jNm',
+ adminEmail:'Itsaime02@gmail.com'
+};
+const backend=window.supabase.createClient(ASPENDER_CONFIG.url,ASPENDER_CONFIG.publishableKey);
+const adminEmail=ASPENDER_CONFIG.adminEmail.toLowerCase();
 let adminUser=null;
 let currentSection='accueil';
 const sectionHistory=[];
@@ -625,11 +630,11 @@ function openCloudAdmin(){
   const status=document.getElementById('adminLoginError');
   try{
    const {error}=await backend.auth.signInWithOtp({
-    email:window.ASPENDER_CONFIG.adminEmail,
+    email:ASPENDER_CONFIG.adminEmail,
     options:{emailRedirectTo:window.location.href}
    });
    if(error)throw error;
-   status.textContent=`Lien envoyé à ${window.ASPENDER_CONFIG.adminEmail}.`;
+   status.textContent=`Lien envoyé à ${ASPENDER_CONFIG.adminEmail}.`;
   }catch(error){
    status.textContent=`Impossible d’envoyer le lien : ${error.message}`;
   }
