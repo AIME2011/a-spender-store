@@ -81,7 +81,7 @@ const products=[
  {id:107,tier:"standard",name:"Autocollant A-SPENDER",cat:"Accessoires",price:200,sizes:["Unique"],tag:""}
 ];
 const defaultHeroTitle=document.querySelector('#accueil h1').textContent;
-const defaultHeroText=document.querySelector('#accueil .hero p').textContent;
+const defaultHeroText=document.querySelector('#accueil .hero-kicker + h1 + p').textContent;
 function escapeHtml(value){
  return String(value).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 }
@@ -118,7 +118,7 @@ async function loadSharedData(){
  if(results[1].data){
   siteSettings={title:results[1].data.title,description:results[1].data.description};
   document.querySelector('#accueil h1').textContent=siteSettings.title;
-  document.querySelector('#accueil .hero p').textContent=siteSettings.description;
+  document.querySelector('#accueil .hero-kicker + h1 + p').textContent=siteSettings.description;
  }
  teamPlayers=results[2].data;
  teamMatches=results[3].data;
@@ -290,7 +290,7 @@ document.getElementById('adminSettings').addEventListener('submit',event=>{
  try{
   localStorage.setItem('aspender_admin_site',JSON.stringify({title,description}));
   document.querySelector('#accueil h1').textContent=title;
-  document.querySelector('#accueil .hero p').textContent=description;
+  document.querySelector('#accueil .hero-kicker + h1 + p').textContent=description;
   alert('Textes enregistrés dans ce navigateur.');
  }catch(error){alert(`Impossible d’enregistrer les textes : ${error.message}`);}
 });
@@ -719,7 +719,7 @@ async function saveSiteSettings(form){
  if(error)throw error;
  siteSettings={title,description};
  document.querySelector('#accueil h1').textContent=title;
- document.querySelector('#accueil .hero p').textContent=description;
+ document.querySelector('#accueil .hero-kicker + h1 + p').textContent=description;
  alert('Textes enregistrés et publiés pour tous les visiteurs.');
 }
 async function addTeamPlayer(form){
