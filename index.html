@@ -3,12 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>A-SPENDER STORE</title>
+<meta name="theme-color" content="#e7e7e2">
+<meta name="description" content="Une galerie éditoriale de silhouettes de basketball imaginaires, signée A-SPENDER STORE à Lomé.">
+<title>COURT CULTURE — A-SPENDER STORE</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<!--
+THESIS: Une galerie de silhouettes originales qui traite la sneaker comme une affiche de culture basket, et non comme un catalogue de vente.
+OWN-WORLD: Fond minéral froid, encre presque noire, bleu d'impression et citron vif; typographie condensée, aplats et repères de planche.
+STORY: Le visiteur découvre six concepts fictifs, les filtre par silhouette, ouvre leur note éditoriale et garde ses favoris.
+FIRST VIEWPORT: Un titre massif à gauche, une sneaker dessinée en grand sur un aplat bleu à droite, puis un index de sélection sous la ligne de flottaison.
+FORM: Expérience éditoriale en grille asymétrique, inspirée des affiches de tournoi sérigraphiées et des planches de dessin de chaussure.
+-->
 <div class="world-transition" id="worldTransition" aria-hidden="true"></div>
 <header class="hdr">
  <div class="container hdr-in">
@@ -27,48 +37,48 @@
 <section id="accueil">
  <div class="hero">
   <div>
-   <p class="hero-kicker">A-SPENDER • CLUB DE BASKETBALL</p>
-   <h1>L'équipement du terrain à la rue de Lomé.</h1>
-   <p>Maillots floqués, shorts, casquettes, chaussures et sacs pour le club A-SPENDER et pour tous ceux qui vivent le basket au quotidien.</p>
+   <h1>La paire<br>fait le <em>match.</em></h1>
+   <p>Des silhouettes qui ont du caractère. Explore notre sélection éditoriale de sneakers de basketball, pensée pour le parquet comme pour la ville.</p>
    <div class="hero-ctas">
-    <button class="btn" onclick="showShop('premium')">Boutique Premium</button>
-    <button class="btn btn-outline" onclick="showShop('standard')">Boutique Standard</button>
-    <button class="btn btn-outline" onclick="showSection('equipe')">L'équipe et les matchs</button>
+    <button class="btn" onclick="showSection('sneakers')">Explorer les paires <span aria-hidden="true">↗</span></button>
+    <button class="btn btn-outline" onclick="showShop('premium')">Voir la boutique</button>
    </div>
   </div>
-  <div class="ball-wrap"><div class="ball" role="img" aria-label="Ballon de basket dans un cercle blanc">
-   <svg class="basketball-art" viewBox="0 0 300 300" aria-hidden="true" focusable="false">
-    <defs>
-     <radialGradient id="basketballSurface" cx="32%" cy="25%" r="78%">
-      <stop offset="0" stop-color="#ffbd5a"/>
-      <stop offset=".56" stop-color="#f47a18"/>
-      <stop offset="1" stop-color="#a93408"/>
-     </radialGradient>
-     <radialGradient id="basketballShade" cx="35%" cy="25%" r="78%">
-      <stop offset=".48" stop-color="#000" stop-opacity="0"/>
-      <stop offset="1" stop-color="#000" stop-opacity=".46"/>
-     </radialGradient>
-     <clipPath id="basketballClip"><circle cx="150" cy="150" r="132"/></clipPath>
-    </defs>
-    <circle cx="150" cy="150" r="132" fill="url(#basketballSurface)"/>
-    <g clip-path="url(#basketballClip)" fill="none" stroke="#24150e" stroke-width="9">
-     <path d="M18 150h264"/>
-     <path d="M150 18c-46 43-69 86-69 132s23 89 69 132"/>
-     <path d="M150 18c46 43 69 86 69 132s-23 89-69 132"/>
-     <path d="M28 79c37 24 78 36 122 36s85-12 122-36"/>
-     <path d="M28 221c37-24 78-36 122-36s85 12 122 36"/>
-    </g>
-    <circle cx="150" cy="150" r="132" fill="url(#basketballShade)"/>
-    <circle cx="150" cy="150" r="131" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="2"/>
-   </svg>
-  </div></div>
+  <div class="hero-art" aria-label="Illustration d’une sneaker de basketball conceptuelle">
+   <div class="hero-art-top"><span>COURT CULTURE</span><span>VOL. 01 — ÉDITION STUDIO</span></div>
+   <div class="hero-shoe" id="heroShoe"></div>
+   <div class="hero-art-bottom"><span>DESIGN STUDY / 001</span><span>LOMÉ, TOGO <b>↗</b></span></div>
+   <span class="hero-index" aria-hidden="true">01</span>
+  </div>
  </div>
- <div class="features">
-  <div class="feature"><h3>Retrait à Lomé</h3><p>Commande en ligne, retrait en boutique ou livraison dans la ville.</p></div>
-  <div class="feature"><h3>Paiement à la livraison</h3><p>Réglez en espèces ou par Mobile Money à la réception du colis.</p></div>
-  <div class="feature"><h3>Floquage sur demande</h3><p>Nom et numéro personnalisés sur les maillots du club.</p></div>
+ <div class="home-meta">
+  <div><span class="meta-label">LE TERRAIN, AUTREMENT</span><p>Une galerie pour les amoureux du jeu et des belles paires.</p></div>
+  <div class="meta-scroll"><span>FAIS DÉFILER</span><b aria-hidden="true">↓</b></div>
+  <div class="meta-number"><strong>01</strong><span>ÉDITION<br>VISUELLE</span></div>
  </div>
- <div class="customer-promise"><span>Notre engagement</span><p>Chez A-SPENDER, le client est roi.</p></div>
+ <div class="featured-heading"><p class="eyebrow">SÉLECTION DU MOMENT</p><button class="text-link" onclick="showSection('sneakers')">Toute la galerie <span aria-hidden="true">↗</span></button></div>
+ <div class="sneaker-grid featured-grid" id="featuredSneakers"></div>
+</section>
+
+<section id="sneakers" style="display:none">
+ <div class="gallery-intro">
+  <p class="eyebrow">COURT CULTURE <span>—</span> GALERIE N° 01</p>
+  <div class="gallery-heading-row"><h2>Choisis ton<br><em>terrain.</em></h2><p>Une sélection d’allures, de formes et de couleurs. La bonne paire commence par un coup de cœur.</p></div>
+  <p class="concept-note">Études de style imaginaires, créées pour cette galerie. Elles ne représentent pas des produits en vente et ne sont affiliées à aucune marque.</p>
+ </div>
+ <div class="gallery-tools">
+  <div class="sneaker-filters" role="group" aria-label="Filtrer les sneakers">
+   <button type="button" class="sneaker-filter active" data-filter="all" aria-pressed="true">Toutes <span id="allCount"></span></button>
+   <button type="button" class="sneaker-filter" data-filter="low" aria-pressed="false">Basses</button>
+   <button type="button" class="sneaker-filter" data-filter="high" aria-pressed="false">Montantes</button>
+   <button type="button" class="sneaker-filter" data-filter="saved" aria-pressed="false">Mes favoris <span id="savedCount"></span></button>
+  </div>
+  <label class="sneaker-search"><span class="sr-only">Rechercher un modèle</span><svg aria-hidden="true" viewBox="0 0 20 20"><circle cx="8.5" cy="8.5" r="5.5"></circle><path d="m13 13 4 4"></path></svg><input id="sneakerSearch" type="search" placeholder="Rechercher une silhouette" autocomplete="off"></label>
+ </div>
+ <p class="gallery-count" id="sneakerCount" aria-live="polite"></p>
+ <div class="sneaker-grid" id="sneakerGrid"></div>
+ <div class="gallery-empty" id="sneakerEmpty" hidden><p>Aucune paire dans cette sélection.</p><button type="button" class="text-link" id="resetSneakerFilters">Réinitialiser les filtres <span aria-hidden="true">↗</span></button></div>
+ <div class="gallery-outro"><span>LE JEU CONTINUE.</span><button class="btn" onclick="showShop('premium')">Découvrir la boutique <span aria-hidden="true">↗</span></button></div>
 </section>
 
 <section id="boutique" style="display:none">

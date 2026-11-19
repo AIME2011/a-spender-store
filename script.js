@@ -1,5 +1,5 @@
-const sections=['accueil','boutique','panier','paiement','compte','equipe','galerie','contact','admin'];
-const navLabels={accueil:'Accueil',boutique:'Boutique',equipe:'Équipe',galerie:'Galerie',contact:'Contact'};
+const sections=['accueil','sneakers','boutique','panier','paiement','compte','equipe','galerie','contact','admin'];
+const navLabels={accueil:'Accueil',sneakers:'Sneakers',boutique:'Boutique',equipe:'Équipe',galerie:'Club',contact:'Contact'};
 const ASPENDER_CONFIG={
  url:'https://cmuaoshkxpsfaqwjrlpu.supabase.co',
  publishableKey:'sb_publishable_GhjBs1RS4zyvaQ3wnc6rKQ_uvxA1jNm',
@@ -51,16 +51,118 @@ document.getElementById('nav').innerHTML=Object.keys(navLabels).map(id=>`<button
 updateBackButton();
 document.getElementById('yr').textContent=new Date().getFullYear();
 
-/* interactive 3D ball */
-const ballWrap=document.querySelector('.ball-wrap');
-ballWrap.addEventListener('pointermove',e=>{
- if(e.pointerType==='touch')return;
- const bounds=ballWrap.getBoundingClientRect();
- const x=(e.clientX-bounds.left)/bounds.width-.5;
- const y=(e.clientY-bounds.top)/bounds.height-.5;
- ballWrap.style.transform=`rotateX(${y*-14}deg) rotateY(${x*18}deg)`;
+/* Original, fictional sneaker studies for the editorial gallery. */
+const sneakerStudies=[
+ {id:'ligne-de-fond',name:'Ligne de fond',profile:'La découpe rapide',silhouette:'low',colors:['#d4ff36','#20231a','#ffffff','#b0d916'],variant:0,note:'Une ligne basse et tendue, pensée comme un trait continu entre la salle et le bitume.'},
+ {id:'dernier-quart',name:'Dernier quart',profile:'La présence calme',silhouette:'high',colors:['#363dff','#17172f','#f4f3ec','#9296ff'],variant:1,note:'Un col qui monte, des panneaux francs : une silhouette construite pour prendre sa place.'},
+ {id:'contre-pied',name:'Contre-pied',profile:'Le contraste juste',silhouette:'low',colors:['#ff633a','#371c19','#f6e5cb','#efa281'],variant:2,note:'Deux rythmes se croisent sur une forme familière, sans perdre la légèreté du mouvement.'},
+ {id:'zone-presse',name:'Zone presse',profile:'Le volume assumé',silhouette:'high',colors:['#f3c845','#252418','#faf8ed','#cfaa33'],variant:3,note:'Des couches superposées et un col généreux composent une lecture presque sculpturale.'},
+ {id:'ligne-libre',name:'Ligne libre',profile:'La fluidité',silhouette:'low',colors:['#9bd8cf','#1a302f','#fff8e9','#74b2a7'],variant:4,note:'Des courbes souples et un fond d’œil discret : une étude de mouvement en douceur.'},
+ {id:'prolongation',name:'Prolongation',profile:'Le détail graphique',silhouette:'high',colors:['#ee79a7','#38202d','#fff3e7','#bc547d'],variant:5,note:'Une forme montante ponctuée de découpes nettes, entre énergie de salle et esprit affiche.'}
+];
+let sneakerFilter='all';
+let savedSneakers=[];
+try{savedSneakers=JSON.parse(localStorage.getItem('aspender_sneaker_favorites')||'[]');if(!Array.isArray(savedSneakers))savedSneakers=[];}catch(error){console.warn('Favoris sneakers indisponibles :',error);}
+function sneakerArt(study){
+ const [accent,ink,light,trim]=study.colors;
+ const high=study.silhouette==='high';
+ const upper=high
+  ?'M77 213 C91 181 93 141 116 127 L126 77 Q128 68 139 68 L194 69 Q205 70 211 81 L245 137 C279 144 307 159 337 180 L415 198 Q448 207 444 229 L432 246 L397 260 L129 265 Q84 260 73 240 Q68 226 77 213 Z'
+  :'M77 213 C91 181 93 151 121 132 L159 103 Q168 97 178 103 L218 137 C261 143 301 161 337 180 L415 198 Q448 207 444 229 L432 246 L397 260 L129 265 Q84 260 73 240 Q68 226 77 213 Z';
+ const panel=high
+  ?'M111 205 L128 128 L145 83 L191 84 L223 143 L198 189 Z'
+  :'M110 207 L133 143 L168 112 L208 145 L197 193 Z';
+ const stripe=[
+  'M115 207 Q194 143 304 174 Q240 182 163 230 Z',
+  'M107 203 Q160 154 233 148 Q194 174 164 225 Z',
+  'M126 211 Q191 157 307 184 Q237 184 167 237 Z',
+  'M112 202 Q185 149 291 177 Q228 181 160 228 Z',
+  'M111 207 Q178 154 290 174 Q228 185 162 231 Z',
+  'M112 206 Q183 149 302 179 Q233 184 163 232 Z'
+ ][study.variant];
+ const laceLines=Array.from({length:5},(_,i)=>`<path d="M${171+i*11} ${high?112+i*7:138+i*5} l31 15" />`).join('');
+ const pattern=study.variant%2
+  ?'<path d="M100 236h30m-20 8h30m-19 8h30" />'
+  :'<circle cx="112" cy="228" r="3" /><circle cx="124" cy="235" r="2" />';
+ return `<svg class="shoe-art" viewBox="0 0 500 340" role="img" aria-label="Illustration originale de la sneaker conceptuelle ${escapeHtml(study.name)}" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="263" cy="278" rx="177" ry="17" fill="#141718" opacity=".19"/>
+  <g stroke-linejoin="round" stroke-linecap="round">
+   <path d="${upper}" fill="${light}" stroke="${ink}" stroke-width="8"/>
+   <path d="M77 225 Q184 250 286 225 Q371 216 440 225 L432 246 L397 260 L129 265 Q84 260 73 240Z" fill="${accent}" stroke="${ink}" stroke-width="7"/>
+   <path d="M91 245 Q206 263 319 244 Q381 235 434 237" fill="none" stroke="${ink}" stroke-width="4" opacity=".8"/>
+   <path d="${panel}" fill="${accent}" stroke="${ink}" stroke-width="6"/>
+   <path d="${stripe}" fill="${trim}" stroke="${ink}" stroke-width="5"/>
+   <path d="M${high?'125 127 L144 130 L149 86':'121 132 L143 138 L167 107'}" fill="none" stroke="${trim}" stroke-width="8"/>
+   <path d="M156 118 Q170 97 192 108 L222 137 L200 150Z" fill="${light}" stroke="${ink}" stroke-width="5"/>
+   <path d="${high?'M130 75 Q158 56 198 69 L204 90 Q163 80 127 93 Z':'M155 103 Q176 89 198 105 L212 121 Q180 110 151 126 Z'}" fill="${ink}" stroke="${ink}" stroke-width="4"/>
+   <path d="${laceLines}" fill="none" stroke="${ink}" stroke-width="5"/>
+   <path d="${laceLines}" fill="none" stroke="${light}" stroke-width="2"/>
+   <path d="M85 219 Q107 207 124 215 L119 236 Q96 237 80 232Z" fill="${trim}" stroke="${ink}" stroke-width="5"/>
+   <path d="M${high?'197 84 L218 88 L242 139':'199 106 L216 120 L240 142'}" fill="none" stroke="${ink}" stroke-width="4" opacity=".55"/>
+   <path d="${pattern}" fill="none" stroke="${ink}" stroke-width="2" opacity=".7"/>
+   <path d="M290 231 Q351 212 409 225" fill="none" stroke="${light}" stroke-width="4" opacity=".9"/>
+  </g>
+ </svg>`;
+}
+function sneakerCard(study,index,featured=false){
+ const saved=savedSneakers.includes(study.id);
+ return `<article class="sneaker-card${featured?' sneaker-featured':''}" style="--shoe-accent:${study.colors[0]};--shoe-ink:${study.colors[1]};--tile-index:${index}">
+  <div class="sneaker-visual${study.silhouette==='high'?' is-high':''}">
+   <span class="shoe-edition">ÉTUDE N° 0${study.variant+1}</span>
+   <button class="favorite-toggle${saved?' is-saved':''}" type="button" data-favorite="${study.id}" aria-label="${saved?'Retirer':'Ajouter'} ${escapeHtml(study.name)} ${saved?'des':'aux'} favoris" aria-pressed="${saved}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 8.9c0 5.2-8.8 10-8.8 10s-8.8-4.8-8.8-10a4.7 4.7 0 0 1 8.8-2.2 4.7 4.7 0 0 1 8.8 2.2Z"/></svg></button>
+   ${sneakerArt(study)}
+   <span class="shoe-silhouette">${study.silhouette==='high'?'MONTANTE':'BASSE'}</span>
+  </div>
+  <div class="sneaker-card-body"><div><p class="sneaker-profile">${escapeHtml(study.profile)}</p><h3>${escapeHtml(study.name)}</h3></div><span class="shoe-arrow" aria-hidden="true">↗</span></div>
+  <details class="shoe-note"><summary>Lire la note de style</summary><p>${escapeHtml(study.note)}</p><span>CONCEPT ORIGINAL · PAS UN ARTICLE EN VENTE</span></details>
+ </article>`;
+}
+function renderSneakers(){
+ const query=document.getElementById('sneakerSearch').value.trim().toLocaleLowerCase('fr');
+ const filtered=sneakerStudies.filter(study=>
+  (sneakerFilter==='all'||(sneakerFilter==='saved'?savedSneakers.includes(study.id):study.silhouette===sneakerFilter))&&
+  `${study.name} ${study.profile} ${study.note}`.toLocaleLowerCase('fr').includes(query)
+ );
+ document.getElementById('sneakerGrid').innerHTML=filtered.map((study,index)=>sneakerCard(study,index)).join('');
+ document.getElementById('sneakerCount').textContent=`${filtered.length} ${filtered.length===1?'silhouette':'silhouettes'} à explorer`;
+ document.getElementById('allCount').textContent=String(sneakerStudies.length).padStart(2,'0');
+ document.getElementById('savedCount').textContent=String(savedSneakers.length).padStart(2,'0');
+ document.getElementById('sneakerEmpty').hidden=filtered.length>0;
+}
+document.getElementById('heroShoe').innerHTML=sneakerArt(sneakerStudies[0]);
+document.getElementById('featuredSneakers').innerHTML=[sneakerStudies[1],sneakerStudies[2],sneakerStudies[3]].map((study,index)=>sneakerCard(study,index,true)).join('');
+document.addEventListener('click',event=>{
+ const button=event.target.closest('[data-favorite]');
+ if(!button)return;
+ const id=button.dataset.favorite;
+ savedSneakers=savedSneakers.includes(id)?savedSneakers.filter(item=>item!==id):[...savedSneakers,id];
+ try{localStorage.setItem('aspender_sneaker_favorites',JSON.stringify(savedSneakers));}catch(error){console.warn('Favoris non conservés après fermeture :',error);}
+ renderSneakers();
+ document.getElementById('featuredSneakers').innerHTML=[sneakerStudies[1],sneakerStudies[2],sneakerStudies[3]].map((study,index)=>sneakerCard(study,index,true)).join('');
 });
-ballWrap.addEventListener('pointerleave',()=>{ballWrap.style.transform='';});
+document.querySelector('.sneaker-filters').addEventListener('click',event=>{
+ const button=event.target.closest('[data-filter]');
+ if(!button)return;
+ sneakerFilter=button.dataset.filter;
+ document.querySelectorAll('.sneaker-filter').forEach(filterButton=>{
+  const active=filterButton===button;
+  filterButton.classList.toggle('active',active);
+  filterButton.setAttribute('aria-pressed',String(active));
+ });
+ renderSneakers();
+});
+document.getElementById('sneakerSearch').addEventListener('input',renderSneakers);
+document.getElementById('resetSneakerFilters').addEventListener('click',()=>{
+ sneakerFilter='all';
+ document.getElementById('sneakerSearch').value='';
+ document.querySelectorAll('.sneaker-filter').forEach(button=>{
+  const active=button.dataset.filter==='all';
+  button.classList.toggle('active',active);
+  button.setAttribute('aria-pressed',String(active));
+ });
+ renderSneakers();
+});
+renderSneakers();
 
 /* products */
 const products=[
@@ -80,8 +182,8 @@ const products=[
  {id:106,tier:"standard",name:"Serviette de sport",cat:"Accessoires",price:5000,sizes:["Unique"],tag:""},
  {id:107,tier:"standard",name:"Autocollant A-SPENDER",cat:"Accessoires",price:200,sizes:["Unique"],tag:""}
 ];
-const defaultHeroTitle=document.querySelector('#accueil h1').textContent;
-const defaultHeroText=document.querySelector('#accueil .hero-kicker + h1 + p').textContent;
+const defaultHeroTitle=document.querySelector('#accueil h1').innerText.trim();
+const defaultHeroText=document.querySelector('#accueil .hero h1 + p').textContent;
 function escapeHtml(value){
  return String(value).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 }
@@ -118,7 +220,7 @@ async function loadSharedData(){
  if(results[1].data){
   siteSettings={title:results[1].data.title,description:results[1].data.description};
   document.querySelector('#accueil h1').textContent=siteSettings.title;
-  document.querySelector('#accueil .hero-kicker + h1 + p').textContent=siteSettings.description;
+  document.querySelector('#accueil .hero h1 + p').textContent=siteSettings.description;
  }
  teamPlayers=results[2].data;
  teamMatches=results[3].data;
@@ -290,7 +392,7 @@ document.getElementById('adminSettings').addEventListener('submit',event=>{
  try{
   localStorage.setItem('aspender_admin_site',JSON.stringify({title,description}));
   document.querySelector('#accueil h1').textContent=title;
-  document.querySelector('#accueil .hero-kicker + h1 + p').textContent=description;
+  document.querySelector('#accueil .hero h1 + p').textContent=description;
   alert('Textes enregistrés dans ce navigateur.');
  }catch(error){alert(`Impossible d’enregistrer les textes : ${error.message}`);}
 });
@@ -719,7 +821,7 @@ async function saveSiteSettings(form){
  if(error)throw error;
  siteSettings={title,description};
  document.querySelector('#accueil h1').textContent=title;
- document.querySelector('#accueil .hero-kicker + h1 + p').textContent=description;
+ document.querySelector('#accueil .hero h1 + p').textContent=description;
  alert('Textes enregistrés et publiés pour tous les visiteurs.');
 }
 async function addTeamPlayer(form){
